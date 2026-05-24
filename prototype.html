@@ -112,82 +112,53 @@
   </div>
 </header>
 
-<!-- =================================================== PROTOTYPE SHELL =================================================== -->
-<div class="proto-shell">
+<!-- =================================================== APP CANVAS =================================================== -->
 
-  <aside class="flow-rail" id="flowRail">
-    <h2>App Flow</h2>
-  </aside>
-
-  <section class="stage">
-    <div class="stage-top">
-      <span class="name" id="stageName">Loading…</span>
-      <span class="idx" id="stageIdx">— / —</span>
-      <div class="controls">
-        <button class="ctl" id="backBtn" title="Back (Esc)" aria-label="Back">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        </button>
-        <button class="ctl" id="restartBtn" title="Restart (R)" aria-label="Restart">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10"/><path d="M1 20v-6h6"/><path d="M1 14l4.7 4.4A9 9 0 0 0 20.5 15"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="proto-device">
-      <div class="proto-screen" id="phoneScreen"></div>
-    </div>
-
-    <div class="stage-bottom">
-      <div class="tip">
-        Tap any <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand-500);margin:0 4px;box-shadow:0 0 0 3px rgba(99,102,241,0.25)"></span> dot · or use
-        <span class="kbd">←</span><span class="kbd">→</span> arrows
-      </div>
-    </div>
-  </section>
-
-  <aside class="info-rail">
-    <div class="info-card">
-      <div class="info-eyebrow" id="infoEyebrow">Step 01 · Auth</div>
-      <div class="info-title" id="infoTitle">Splash Screen</div>
-      <div class="info-desc" id="infoDesc">Brand reveal with subtle gradient &amp; loader</div>
-    </div>
-
-    <div>
-      <div class="info-eyebrow" style="margin-bottom:8px">Available Actions</div>
-      <div class="info-actions" id="infoActions"></div>
-    </div>
-
-    <div class="tour-card">
-      <div class="lbl">Auto-play demo</div>
-      <div class="t">Guided Tour</div>
-      <div class="s">Walks through the full app flow in ~60 seconds. Perfect for a client demo.</div>
-      <button class="btn-tour" id="tourBtn">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-        <span id="tourBtnLabel">Start guided tour</span>
-      </button>
-    </div>
-
-    <div class="nav-buttons">
-      <button id="prevBtn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        Prev
-      </button>
-      <button id="nextBtn">
-        Next
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-    </div>
-
-    <div style="font-size:11px;color:var(--text-tertiary);line-height:1.6;padding:4px 4px 12px">
-      <strong style="color:var(--text-secondary)">Keyboard:</strong>
-      <span class="kbd">←</span> <span class="kbd">→</span> navigate ·
-      <span class="kbd">Esc</span> back ·
-      <span class="kbd">R</span> restart ·
-      <span class="kbd">Space</span> tour
-    </div>
-  </aside>
-
+<!-- Top-left app indicator -->
+<div class="app-indicator">
+  <div class="mark">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V8l4 6 4-10 4 10 4-6v12"/></svg>
+  </div>
+  <div>
+    <div class="name">Folio ERP</div>
+  </div>
+  <div class="screen" id="indicatorScreen">Loading…</div>
 </div>
+
+<!-- Top-right floating controls -->
+<div class="float-controls">
+  <a href="index.html" class="ctl" title="Design Board" aria-label="Design Board">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </a>
+  <button class="ctl" id="screensBtn" title="All screens (S)" aria-label="All screens">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <button class="ctl" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+    <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+  </button>
+</div>
+
+<!-- The app: a centered phone showing one screen at a time -->
+<div class="app-canvas">
+  <div class="phone-frame">
+    <div class="phone-screen" id="phoneScreen"></div>
+  </div>
+</div>
+
+<!-- Toast that briefly shows the current screen name on navigation -->
+<div class="toast" id="toast"></div>
+
+<!-- Slide-in drawer: jump to any screen (for QA-style feature checking) -->
+<div class="screens-drawer-overlay" id="screensDrawerOverlay"></div>
+<aside class="screens-drawer" id="screensDrawer">
+  <div class="head">
+    <h2>All Screens</h2>
+    <button class="close" id="drawerClose" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="list" id="screensList"></div>
+</aside>
 
 <!-- =================================================== HIDDEN SOURCE: 26 SCREENS =================================================== -->
 <!-- The original design-board markup is kept below but hidden. prototype.js reads each .device-screen from this DOM and renders one at a time inside #phoneScreen. This means the prototype works locally (file://) and online without any fetch() calls. -->

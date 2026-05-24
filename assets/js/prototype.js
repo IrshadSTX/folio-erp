@@ -1,6 +1,7 @@
 /* =========================================================
-   Folio ERP — Interactive Prototype
-   Loads screens from index.html and wires app-flow navigation.
+   Folio ERP — Live App Runtime
+   Renders each screen, wires every visible control to work,
+   and navigates between screens like a real mobile app.
    ========================================================= */
 
 (function () {
@@ -8,224 +9,267 @@
 
   // ---------- Theme ----------
   const root = document.documentElement;
-  const themeBtn = document.getElementById('themeToggle');
-  const themeIcon = document.getElementById('themeIcon');
   const STORAGE_KEY = 'folio-erp-theme';
   applyTheme(localStorage.getItem(STORAGE_KEY) || 'light');
 
   function applyTheme(theme) {
     root.setAttribute('data-theme', theme);
-    if (themeIcon) {
-      themeIcon.innerHTML = theme === 'dark'
+    const icon = document.getElementById('themeIcon');
+    if (icon) {
+      icon.innerHTML = theme === 'dark'
         ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>'
         : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
     }
   }
-  themeBtn && themeBtn.addEventListener('click', () => {
-    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    localStorage.setItem(STORAGE_KEY, next);
-    applyTheme(next);
-  });
 
-  // ---------- Section labels ----------
+  // ---------- Section labels for the screens drawer ----------
   const SECTIONS = [
-    { name: 'Onboarding & Auth', screens: [1, 2, 3, 4] },
+    { name: 'Onboarding & Auth',     screens: [1, 2, 3, 4] },
     { name: 'Dashboard & Navigation', screens: [5, 6, 7, 8] },
-    { name: 'Sales', screens: [9, 10, 11, 12, 13] },
-    { name: 'Customers & Accounts', screens: [14, 15, 16] },
-    { name: 'Proposals & Reports', screens: [17, 18, 19, 20] },
-    { name: 'Settings & States', screens: [21, 22, 23, 24, 25, 26] }
+    { name: 'Sales',                  screens: [9, 10, 11, 12, 13] },
+    { name: 'Customers & Accounts',   screens: [14, 15, 16] },
+    { name: 'Proposals & Reports',    screens: [17, 18, 19, 20] },
+    { name: 'Settings & States',      screens: [21, 22, 23, 24, 25, 26] }
   ];
 
-  // ---------- Flow map ----------
-  // Defines navigation: which DOM selector in each screen routes to which screen index.
-  // 'auto' = auto-advance after delay (ms)
+  // ---------- Navigation flow ----------
+  // selector → target screen id (when this element is clicked, go there).
+  // Special: 'auto' = automatically advance after delay (ms).
   const FLOW = {
-    1: { auto: { next: 2, delay: 2400 }, info: 'Brand reveal · auto-advances to onboarding', actions: [{ label: 'Skip to onboarding', target: 2 }] },
-    2: { hotspots: [
-        { selector: '.onb .btn-primary', target: 3, label: 'Continue to login' },
-        { selector: '.onb .skip', target: 3, label: 'Skip onboarding' }
-      ], info: 'Onboarding · feature highlights · tap Next to continue', actions: [{ label: 'Go to login', target: 3 }] },
-    3: { hotspots: [
-        { selector: '.btn-primary', target: 4, label: 'Sign in → OTP' },
-        { selector: '.auth-row .link', target: 4, label: 'Forgot password (demo: OTP)' }
-      ], info: 'Sign in with email or social · biometric optional', actions: [{ label: 'Sign in', target: 4 }, { label: 'Use OTP', target: 4 }] },
-    4: { hotspots: [
-        { selector: '.btn-primary', target: 5, label: 'Verify → Dashboard' },
-        { selector: '.icon-btn', target: 3, label: 'Back to login' }
-      ], info: 'Enter the 6-digit code or use biometric', actions: [{ label: 'Verify & continue', target: 5 }, { label: 'Back to login', target: 3 }] },
-    5: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 6, label: 'Open menu drawer' },
-        { selector: '.app-header .right .icon-pill:nth-of-type(1)', target: 7, label: 'Search' },
-        { selector: '.app-header .right .icon-pill:nth-of-type(2)', target: 8, label: 'Notifications' },
-        { selector: '.fab', target: 10, label: 'Create new invoice' },
-        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9, label: 'Sales / Invoices' },
-        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14, label: 'Customers' },
-        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19, label: 'Reports' },
-        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21, label: 'Settings' },
-        { selector: '.quick-act:nth-child(1)', target: 10, label: 'Quick: New invoice' },
-        { selector: '.quick-act:nth-child(3)', target: 12, label: 'Quick: Quotation' }
-      ], info: 'Home dashboard · revenue · KPIs · quick actions', actions: [
-        { label: 'Open menu', target: 6 }, { label: 'Search', target: 7 },
-        { label: 'Notifications', target: 8 }, { label: 'Create invoice (FAB)', target: 10 },
-        { label: 'Go to Sales', target: 9 }, { label: 'Customers tab', target: 14 },
-        { label: 'Reports tab', target: 19 }, { label: 'Settings tab', target: 21 }
-      ] },
-    6: { hotspots: [
-        { selector: '.nav-link:nth-of-type(1)', target: 5, label: 'Dashboard' },
-        { selector: '.nav-link:nth-of-type(2)', target: 9, label: 'Invoices' },
-        { selector: '.nav-link:nth-of-type(3)', target: 12, label: 'Quotations' },
-        { selector: '.nav-link:nth-of-type(4)', target: 17, label: 'Proposals' },
-        { selector: '.nav-link:nth-of-type(5)', target: 13, label: 'Credit Notes' }
-      ], info: 'Side drawer · all modules', actions: [
-        { label: 'Dashboard', target: 5 }, { label: 'Invoices', target: 9 },
-        { label: 'Quotations', target: 12 }, { label: 'Proposals', target: 17 },
-        { label: 'Credit Notes', target: 13 }, { label: 'Accounts', target: 16 }
-      ] },
-    7: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 5, label: 'Back to dashboard' },
-        { selector: '.list-item:nth-of-type(1)', target: 15, label: 'Open customer profile' }
-      ], info: 'Global search · find anything fast', actions: [
-        { label: 'Back to dashboard', target: 5 }, { label: 'Tap first customer', target: 15 }
-      ] },
-    8: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 5, label: 'Back' },
-        { selector: '.notif-item:nth-of-type(1)', target: 11, label: 'Open paid invoice' },
-        { selector: '.notif-item:nth-of-type(3)', target: 12, label: 'View approved quotation' }
-      ], info: 'Notifications · payments · approvals · alerts', actions: [
-        { label: 'Back to dashboard', target: 5 }, { label: 'Tap payment notification', target: 11 }
-      ] },
-    9: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 5, label: 'Back to dashboard' },
-        { selector: '.fab', target: 10, label: 'Create new invoice' },
-        { selector: '.list-item:nth-of-type(1)', target: 11, label: 'Open invoice INV-2412' },
-        { selector: '.app-header .right .icon-pill:nth-of-type(2)', target: 20, label: 'Open filters' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' },
-        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14, label: 'Customers' },
-        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19, label: 'Reports' },
-        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21, label: 'Settings' }
-      ], info: 'Invoices list · filter by status · swipe rows', actions: [
-        { label: 'Create new', target: 10 }, { label: 'Open INV-2412', target: 11 }, { label: 'Filters', target: 20 }
-      ] },
-    10: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 9, label: 'Cancel · back to list' },
-        { selector: '[style*="bottom:0"] .btn-primary', target: 11, label: 'Send invoice → preview' },
-        { selector: '[style*="bottom:0"] .btn-secondary', target: 11, label: 'Preview invoice' }
-      ], info: 'Create invoice · customer + items + auto tax', actions: [
-        { label: 'Send invoice', target: 11 }, { label: 'Preview', target: 11 }, { label: 'Cancel', target: 9 }
-      ] },
-    11: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 9, label: 'Back to list' }
-      ], info: 'Invoice preview · paid in full · share / PDF', actions: [
-        { label: 'Back to list', target: 9 }, { label: 'Go to customer', target: 15 }
-      ] },
-    12: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 5, label: 'Back to dashboard' },
-        { selector: '.fab', target: 10, label: 'New quotation (demo: invoice)' },
-        { selector: '.list-item:nth-of-type(4)', target: 11, label: 'Convert approved → invoice' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' }
-      ], info: 'Quotations · send · approve · convert', actions: [
-        { label: 'New quotation', target: 10 }, { label: 'Convert approved', target: 11 }
-      ] },
-    13: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 6, label: 'Back to drawer' },
-        { selector: '[style*="bottom:0"] .btn-primary', target: 9, label: 'Issue credit note' }
-      ], info: 'Credit note · refund linked to invoice', actions: [
-        { label: 'Issue credit note', target: 9 }, { label: 'Back', target: 6 }
-      ] },
-    14: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 6, label: 'Open drawer' },
-        { selector: '.list-item:nth-of-type(1)', target: 15, label: 'Open Sharma Traders' },
-        { selector: '.list-item', target: 15, label: 'Open customer profile' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' },
-        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9, label: 'Sales' },
-        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19, label: 'Reports' },
-        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21, label: 'Settings' }
-      ], info: 'Customers · A–Z list · balance & status', actions: [
-        { label: 'Open a customer', target: 15 }, { label: 'Back home', target: 5 }
-      ] },
-    15: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 14, label: 'Back to list' },
-        { selector: '.profile-actions .pa:nth-child(4)', target: 10, label: 'New invoice for customer' }
-      ], info: 'Customer 360° · transactions · balance · contact', actions: [
-        { label: 'Back to list', target: 14 }, { label: 'New invoice', target: 10 }
-      ] },
-    16: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 6, label: 'Back to drawer' }
-      ], info: 'Accounts · cash position · banks · transactions', actions: [
-        { label: 'Back', target: 6 }, { label: 'Open reports', target: 19 }
-      ] },
-    17: { hotspots: [
-        { selector: '.btn-primary', target: 18, label: 'Send reminder · open signature' }
-      ], info: 'Proposal cover & approval tracker', actions: [
-        { label: 'Open e-signature', target: 18 }, { label: 'Back to drawer', target: 6 }
-      ] },
-    18: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 17, label: 'Back to proposal' },
-        { selector: '[style*="bottom:0"] .btn-success', target: 11, label: 'Sign → invoice issued' }
-      ], info: 'E-sign · approve · audit trail', actions: [
-        { label: 'Approve & sign', target: 11 }, { label: 'Back', target: 17 }
-      ] },
-    19: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 6, label: 'Open menu' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' },
-        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9, label: 'Sales' },
-        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14, label: 'Customers' },
-        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21, label: 'Settings' }
-      ], info: 'Reports · revenue · categories · top customers', actions: [
-        { label: 'Back home', target: 5 }, { label: 'Open settings', target: 21 }
-      ] },
-    20: { hotspots: [
-        { selector: '[style*="z-index"] .btn-primary, .btn-primary', target: 9, label: 'Apply filters → back to list' },
-        { selector: '.btn-secondary', target: 9, label: 'Cancel filters' }
-      ], info: 'Filter bottom sheet · status · date · amount', actions: [
-        { label: 'Apply filters', target: 9 }, { label: 'Cancel', target: 9 }
-      ] },
-    21: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 5, label: 'Back to dashboard' },
-        { selector: '.card[style*="padding:18px"]', target: 22, label: 'Open my profile' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' }
-      ], info: 'Settings · workspace · preferences · security', actions: [
-        { label: 'Open my profile', target: 22 }, { label: 'Back', target: 5 }
-      ] },
-    22: { hotspots: [
-        { selector: '.app-header .left .icon-pill', target: 21, label: 'Back to settings' }
-      ], info: 'User profile · plan card · activity', actions: [
-        { label: 'Back to settings', target: 21 }, { label: 'Home', target: 5 }
-      ] },
-    23: { hotspots: [
-        { selector: '.empty .btn-primary', target: 10, label: 'Create first invoice' },
-        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5, label: 'Home' }
-      ], info: 'Empty state · clear CTA · helpful guides', actions: [
-        { label: 'Create first invoice', target: 10 }, { label: 'Home', target: 5 }
-      ] },
-    24: { auto: { next: 5, delay: 2200 }, info: 'Loading skeleton · auto-resolves to dashboard', actions: [{ label: 'Skip to dashboard', target: 5 }] },
-    25: { hotspots: [
-        { selector: '.err .btn-primary', target: 5, label: 'Retry → dashboard' }
-      ], info: 'Offline mode · drafts saved · retry', actions: [
-        { label: 'Retry', target: 5 }, { label: 'Open drafts', target: 9 }
-      ] },
-    26: { hotspots: [
-        { selector: '.err .btn-secondary', target: 5, label: 'Go back home' }
-      ], info: 'Permission denied · request access', actions: [
-        { label: 'Go back', target: 5 }, { label: 'Settings', target: 21 }
-      ] }
+    1: { auto: { next: 2, delay: 2400 } },
+    2: {
+      hotspots: [
+        { selector: '.onb .btn-primary', target: 3 },
+        { selector: '.onb .skip', target: 3 }
+      ]
+    },
+    3: {
+      hotspots: [
+        { selector: '.btn-primary', target: 4 },
+        { selector: '.auth-row .link', target: 4 },
+        { selector: '.bottom-link .link', target: 4 }
+      ]
+    },
+    4: {
+      hotspots: [
+        { selector: '.btn-primary', target: 5 },
+        { selector: '.icon-btn', target: 3 },
+        { selector: '.biometric', target: 5 }
+      ]
+    },
+    5: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 6 },
+        { selector: '.app-header .right .icon-pill:nth-of-type(1)', target: 7 },
+        { selector: '.app-header .right .icon-pill:nth-of-type(2)', target: 8 },
+        { selector: '.fab', target: 10 },
+        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 },
+        { selector: '.quick-act:nth-child(1)', target: 10 },
+        { selector: '.quick-act:nth-child(2)', target: 14 },
+        { selector: '.quick-act:nth-child(3)', target: 12 },
+        { selector: '.quick-act:nth-child(4)', target: 11 },
+        { selector: '.activity-item:nth-child(1)', target: 11 },
+        { selector: '.activity-item:nth-child(2)', target: 11 },
+        { selector: '.activity-item:nth-child(3)', target: 9 },
+        { selector: '.balance-card', target: 16 }
+      ]
+    },
+    6: {
+      hotspots: [
+        { selector: '.nav-link:nth-of-type(1)', target: 5 },
+        { selector: '.nav-link:nth-of-type(2)', target: 9 },
+        { selector: '.nav-link:nth-of-type(3)', target: 12 },
+        { selector: '.nav-link:nth-of-type(4)', target: 17 },
+        { selector: '.nav-link:nth-of-type(5)', target: 13 },
+        { selector: '.nav-link:nth-of-type(6)', target: 19 },
+        // scrim closes drawer
+        { selector: '[style*="rgba(15,23,42,0.5)"]', target: 5 }
+      ]
+    },
+    7: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.list-item:nth-of-type(1)', target: 15 },
+        { selector: '.list-item:nth-of-type(2)', target: 15 },
+        { selector: '.list-item:nth-of-type(3)', target: 11 },
+        { selector: '.list-item:nth-of-type(4)', target: 11 },
+        { selector: '.list-item:nth-of-type(5)', target: 11 }
+      ]
+    },
+    8: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.notif-item:nth-of-type(1)', target: 11 },
+        { selector: '.notif-item:nth-of-type(2)', target: 11 },
+        { selector: '.notif-item:nth-of-type(3)', target: 12 }
+      ]
+    },
+    9: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.fab', target: 10 },
+        { selector: '.list-item:nth-of-type(1)', target: 11 },
+        { selector: '.list-item:nth-of-type(2)', target: 11 },
+        { selector: '.list-item:nth-of-type(3)', target: 11 },
+        { selector: '.list-item:nth-of-type(4)', target: 11 },
+        { selector: '.list-item:nth-of-type(5)', target: 11 },
+        { selector: '.list-item:nth-of-type(6)', target: 10 },
+        { selector: '.list-item:nth-of-type(7)', target: 10 },
+        { selector: '.app-header .right .icon-pill:nth-of-type(2)', target: 20 },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 }
+      ]
+    },
+    10: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 9 },
+        { selector: '.app-header .right .btn', target: 9 },
+        { selector: '[style*="bottom:0"] .btn-primary', target: 11 },
+        { selector: '[style*="bottom:0"] .btn-secondary', target: 11 }
+      ]
+    },
+    11: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 9 },
+        { selector: '.app-header .right .icon-pill:nth-of-type(1)', target: 23 },
+        { selector: '[style*="grid-template-columns:1fr 1fr"] .btn-primary', target: 23 },
+        { selector: '[style*="grid-template-columns:1fr 1fr"] .btn-secondary', target: 8 }
+      ]
+    },
+    12: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.fab', target: 10 },
+        { selector: '.card .btn-primary', target: 10 },
+        { selector: '.list-item:nth-of-type(1)', target: 17 },
+        { selector: '.list-item:nth-of-type(2)', target: 17 },
+        { selector: '.list-item:nth-of-type(3)', target: 17 },
+        { selector: '.list-item:nth-of-type(4)', target: 11 },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 }
+      ]
+    },
+    13: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 6 },
+        { selector: '[style*="bottom:0"] .btn-primary', target: 9 },
+        { selector: '[style*="bottom:0"] .btn-secondary', target: 9 }
+      ]
+    },
+    14: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 6 },
+        { selector: '.fab', target: 7 },
+        { selector: '.list-item', target: 15, all: true },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 }
+      ]
+    },
+    15: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 14 },
+        { selector: '.profile-actions .pa:nth-child(1)', target: 15 },
+        { selector: '.profile-actions .pa:nth-child(2)', target: 15 },
+        { selector: '.profile-actions .pa:nth-child(3)', target: 15 },
+        { selector: '.profile-actions .pa:nth-child(4)', target: 10 },
+        { selector: '.activity-item', target: 11, all: true }
+      ]
+    },
+    16: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 6 },
+        { selector: '.activity-item', target: 11, all: true }
+      ]
+    },
+    17: {
+      hotspots: [
+        { selector: '.icon-pill', target: 6, all: true },
+        { selector: '.btn-primary', target: 18 }
+      ]
+    },
+    18: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 17 },
+        { selector: '[style*="bottom:0"] .btn-success', target: 11 },
+        { selector: '[style*="bottom:0"] .btn-secondary', target: 17 }
+      ]
+    },
+    19: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 6 },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 }
+      ]
+    },
+    20: {
+      hotspots: [
+        { selector: '[style*="grid-template-columns:1fr 1.4fr"] .btn-primary', target: 9 },
+        { selector: '[style*="grid-template-columns:1fr 1.4fr"] .btn-secondary', target: 9 }
+      ]
+    },
+    21: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.card[style*="padding:18px"]', target: 22 },
+        { selector: '.setting-item:nth-of-type(1)', target: 22 },
+        { selector: '.btn-secondary[style*="rose"]', target: 3 },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(2)', target: 9 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 }
+      ]
+    },
+    22: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 21 },
+        { selector: '.app-header .right .icon-pill', target: 21 },
+        { selector: '.activity-item', target: 11, all: true }
+      ]
+    },
+    23: {
+      hotspots: [
+        { selector: '.empty .btn-primary', target: 10 },
+        { selector: '.bottom-nav .nav-item:nth-child(1)', target: 5 },
+        { selector: '.bottom-nav .nav-item:nth-child(3)', target: 14 },
+        { selector: '.bottom-nav .nav-item:nth-child(4)', target: 19 },
+        { selector: '.bottom-nav .nav-item:nth-child(5)', target: 21 }
+      ]
+    },
+    24: { auto: { next: 5, delay: 2200 } },
+    25: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.err .btn-primary', target: 5 }
+      ]
+    },
+    26: {
+      hotspots: [
+        { selector: '.app-header .left .icon-pill', target: 5 },
+        { selector: '.err .btn-secondary', target: 5 },
+        { selector: '.err .btn-primary', target: 8 },
+        { selector: '.setting-item:nth-of-type(2)', target: 8 }
+      ]
+    }
   };
-
-  // Guided tour: ordered walkthrough of key screens
-  const TOUR = [1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26];
 
   // ---------- State ----------
   const state = {
-    screens: [],          // [{id, name, desc, html, sectionIdx, sectionName, indexInBoard}]
-    currentIdx: 0,        // index into TOUR/screens by id
+    screens: [],
     currentId: 1,
-    sprite: '',
     history: [],
-    visited: new Set(),
-    tourActive: false,
-    tourTimer: null,
-    autoTimer: null
+    autoTimer: null,
+    toastTimer: null
   };
 
   // ---------- Bootstrap ----------
@@ -236,311 +280,307 @@
   }
 
   function init() {
-    try {
-      // Screens are inlined in prototype.html inside #screensSource — read them directly.
-      const source = document.getElementById('screensSource');
-      if (!source) throw new Error('#screensSource not found');
+    const source = document.getElementById('screensSource');
+    if (!source) {
+      showError('App data missing.');
+      return;
+    }
 
-      const wraps = source.querySelectorAll('.device-wrap');
-      wraps.forEach((w, i) => {
-        const id = parseInt(w.id.replace('screen-', ''), 10) || (i + 1);
-        const nameEl = w.querySelector('.device-caption .name');
-        const descEl = w.querySelector('.device-caption .desc');
-        const screenEl = w.querySelector('.device-screen');
-        if (!screenEl) return;
+    const wraps = source.querySelectorAll('.device-wrap');
+    wraps.forEach(w => {
+      const id = parseInt(w.id.replace('screen-', ''), 10);
+      if (!id) return;
+      const nameEl = w.querySelector('.device-caption .name');
+      const screenEl = w.querySelector('.device-screen');
+      if (!screenEl) return;
 
-        const section = SECTIONS.find(s => s.screens.includes(id));
-        state.screens.push({
-          id,
-          name: nameEl ? nameEl.textContent.trim() : `Screen ${id}`,
-          desc: descEl ? descEl.textContent.trim() : '',
-          html: screenEl.innerHTML,
-          sectionName: section ? section.name : 'Misc'
-        });
+      const section = SECTIONS.find(s => s.screens.includes(id));
+      state.screens.push({
+        id,
+        name: nameEl ? nameEl.textContent.trim() : 'Screen ' + id,
+        html: screenEl.innerHTML,
+        sectionName: section ? section.name : 'Misc'
       });
+    });
+    state.screens.sort((a, b) => a.id - b.id);
 
-      state.screens.sort((a, b) => a.id - b.id);
+    if (state.screens.length === 0) {
+      showError('No screens found.');
+      return;
+    }
 
-      if (state.screens.length === 0) {
-        throw new Error('No screens found in #screensSource');
-      }
+    buildScreensList();
+    wireControls();
+    setupKeyboard();
+    goTo(1, { addToHistory: false, showToast: false });
+  }
 
-      buildFlowMap();
-      goTo(1, { addToHistory: false });
-      setupKeyboard();
-    } catch (e) {
-      console.error('Failed to init prototype:', e);
-      const phone = document.getElementById('phoneScreen');
-      if (phone) {
-        phone.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);font-size:13px">' +
-          '<div style="font-size:32px;margin-bottom:12px">⚠️</div>' +
-          'Could not load screens.<br><br>' +
-          '<small style="color:var(--text-tertiary)">' + (e.message || 'Unknown error') + '</small></div>';
-      }
+  function showError(msg) {
+    const phone = document.getElementById('phoneScreen');
+    if (phone) {
+      phone.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);font-size:13px"><div style="font-size:32px;margin-bottom:12px">⚠️</div>' + msg + '</div>';
     }
   }
 
-  // ---------- Flow map (left rail) ----------
-  function buildFlowMap() {
-    const rail = document.getElementById('flowRail');
-    if (!rail) return;
-    rail.innerHTML = '<h2>App Flow</h2>';
-
-    SECTIONS.forEach((section, sIdx) => {
-      const groupEl = document.createElement('div');
-      groupEl.className = 'flow-group';
-      groupEl.innerHTML = `<div class="gh"><span class="num">0${sIdx + 1}</span> ${section.name}</div>`;
-
+  // ---------- Screens drawer (slide-in screen picker) ----------
+  function buildScreensList() {
+    const list = document.getElementById('screensList');
+    if (!list) return;
+    list.innerHTML = '';
+    SECTIONS.forEach((section, si) => {
+      const group = document.createElement('div');
+      group.className = 'group';
+      group.innerHTML = '<div class="gh">' + String(si + 1).padStart(2, '0') + ' · ' + section.name + '</div>';
       section.screens.forEach(id => {
-        const screen = state.screens.find(s => s.id === id);
-        if (!screen) return;
+        const s = state.screens.find(x => x.id === id);
+        if (!s) return;
         const item = document.createElement('div');
-        item.className = 'flow-item';
-        item.setAttribute('data-screen-id', id);
-        item.innerHTML = `
-          <span class="dot"></span>
-          <span class="lbl">${screen.name}</span>
-          <span class="idx">${String(id).padStart(2, '0')}</span>
-        `;
-        item.addEventListener('click', () => goTo(id));
-        groupEl.appendChild(item);
+        item.className = 'item';
+        item.dataset.screenId = id;
+        item.innerHTML = '<span class="num">' + String(id).padStart(2, '0') + '</span><span class="lbl">' + s.name + '</span>';
+        item.addEventListener('click', () => {
+          goTo(id);
+          closeDrawer();
+        });
+        group.appendChild(item);
       });
-
-      rail.appendChild(groupEl);
+      list.appendChild(group);
     });
   }
 
-  function refreshFlowMap() {
-    document.querySelectorAll('.flow-item').forEach(el => {
-      const id = parseInt(el.getAttribute('data-screen-id'), 10);
+  function refreshScreensList() {
+    document.querySelectorAll('.screens-drawer .item').forEach(el => {
+      const id = parseInt(el.dataset.screenId, 10);
       el.classList.toggle('is-active', id === state.currentId);
-      el.classList.toggle('is-visited', state.visited.has(id) && id !== state.currentId);
+    });
+    const active = document.querySelector('.screens-drawer .item.is-active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+
+  function openDrawer() {
+    document.getElementById('screensDrawerOverlay')?.classList.add('is-open');
+    document.getElementById('screensDrawer')?.classList.add('is-open');
+    refreshScreensList();
+  }
+  function closeDrawer() {
+    document.getElementById('screensDrawerOverlay')?.classList.remove('is-open');
+    document.getElementById('screensDrawer')?.classList.remove('is-open');
+  }
+
+  // ---------- Floating controls ----------
+  function wireControls() {
+    document.getElementById('themeBtn')?.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(STORAGE_KEY, next);
+      applyTheme(next);
     });
 
-    // Auto-scroll active into view
-    const active = document.querySelector('.flow-item.is-active');
-    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    document.getElementById('screensBtn')?.addEventListener('click', openDrawer);
+    document.getElementById('drawerClose')?.addEventListener('click', closeDrawer);
+    document.getElementById('screensDrawerOverlay')?.addEventListener('click', closeDrawer);
   }
 
   // ---------- Render screen ----------
-  function goTo(id, opts = {}) {
-    const { addToHistory = true } = opts;
+  function goTo(id, opts) {
+    opts = opts || {};
+    const addToHistory = opts.addToHistory !== false;
+    const showToast = opts.showToast !== false;
+
     const screen = state.screens.find(s => s.id === id);
     if (!screen) return;
 
-    // Clear timers
     clearTimeout(state.autoTimer);
 
-    // History
     if (addToHistory && state.currentId && state.currentId !== id) {
       state.history.push(state.currentId);
-      if (state.history.length > 30) state.history.shift();
+      if (state.history.length > 50) state.history.shift();
     }
-
     state.currentId = id;
-    state.visited.add(id);
 
-    // Fade animation
-    const screenEl = document.getElementById('phoneScreen');
-    if (screenEl) {
-      screenEl.style.opacity = '0';
-      setTimeout(() => {
-        screenEl.innerHTML = screen.html;
-        screenEl.style.opacity = '1';
-        wireHotspots(screen.id);
-      }, 160);
+    const phone = document.getElementById('phoneScreen');
+    if (phone) {
+      phone.innerHTML = screen.html;
+      phone.classList.remove('is-changing');
+      // Restart animation
+      void phone.offsetWidth;
+      phone.classList.add('is-changing');
+      wireScreen();
     }
 
-    updateInfoPanel(screen);
-    refreshFlowMap();
-    updateStageTop(screen);
+    updateIndicator(screen);
+    refreshScreensList();
 
-    // Auto-advance (splash, loading)
+    if (showToast) flashToast(screen.name);
+
+    // Auto-advance for splash, loading
     const flow = FLOW[id];
     if (flow && flow.auto) {
-      state.autoTimer = setTimeout(() => goTo(flow.auto.next), flow.auto.delay);
-    }
-
-    // Tour continuation
-    if (state.tourActive) {
-      clearTimeout(state.tourTimer);
-      const tourPos = TOUR.indexOf(id);
-      if (tourPos === -1 || tourPos === TOUR.length - 1) {
-        // End of tour
-        stopTour();
-      } else {
-        state.tourTimer = setTimeout(() => {
-          if (state.tourActive) goTo(TOUR[tourPos + 1]);
-        }, 2800);
-      }
+      state.autoTimer = setTimeout(() => goTo(flow.auto.next, { showToast: false }), flow.auto.delay);
     }
   }
 
-  // ---------- Hotspots ----------
-  function wireHotspots(screenId) {
-    const flow = FLOW[screenId];
-    if (!flow || !flow.hotspots) return;
-
-    const screenEl = document.getElementById('phoneScreen');
-    if (!screenEl) return;
-
-    flow.hotspots.forEach((hs, i) => {
-      const targets = screenEl.querySelectorAll(hs.selector);
-      targets.forEach(t => {
-        t.style.cursor = 'pointer';
-        t.style.position = t.style.position || 'relative';
-        t.setAttribute('data-hotspot-id', i);
-        t.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          goTo(hs.target);
-        }, { once: false });
-      });
-      // Only attach to first match to avoid stacking on duplicates
-    });
-
-    // Add ping indicators on the *first* hotspot of each unique selector
-    if (flow.hotspots.length > 0) {
-      // Wait a tick for layout
-      requestAnimationFrame(() => paintHotspotPings(flow.hotspots));
-    }
-  }
-
-  function paintHotspotPings(hotspots) {
-    const screenEl = document.getElementById('phoneScreen');
-    if (!screenEl) return;
-    // Remove old pings
-    screenEl.querySelectorAll('.hotspot').forEach(p => p.remove());
-
-    const seen = new Set();
-    hotspots.forEach(hs => {
-      if (seen.has(hs.selector)) return;
-      const target = screenEl.querySelector(hs.selector);
-      if (!target) return;
-      seen.add(hs.selector);
-
-      const rect = target.getBoundingClientRect();
-      const containerRect = screenEl.getBoundingClientRect();
-      const top = rect.top - containerRect.top + (rect.height / 2) - 9;
-      const left = rect.left - containerRect.left + (rect.width / 2) - 9;
-
-      // Skip if target is off-screen
-      if (top < 0 || top > containerRect.height || left < 0 || left > containerRect.width) return;
-
-      const ping = document.createElement('div');
-      ping.className = 'hotspot';
-      ping.style.top = top + 'px';
-      ping.style.left = left + 'px';
-      screenEl.appendChild(ping);
-    });
-  }
-
-  // ---------- Info panel (right rail) ----------
-  function updateInfoPanel(screen) {
-    const titleEl = document.getElementById('infoTitle');
-    const descEl = document.getElementById('infoDesc');
-    const eyebrowEl = document.getElementById('infoEyebrow');
-    const actionsEl = document.getElementById('infoActions');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    if (titleEl) titleEl.textContent = screen.name;
-    if (descEl) {
-      const flow = FLOW[screen.id];
-      descEl.textContent = flow && flow.info ? flow.info : screen.desc;
-    }
-    if (eyebrowEl) eyebrowEl.textContent = `Step ${String(screen.id).padStart(2, '0')} · ${screen.sectionName}`;
-
-    // Actions
-    if (actionsEl) {
-      const flow = FLOW[screen.id];
-      const actions = (flow && flow.actions) || [];
-      actionsEl.innerHTML = '';
-      if (actions.length === 0) {
-        actionsEl.innerHTML = '<div style="font-size:12px;color:var(--text-tertiary);padding:8px 4px">No actions on this screen.</div>';
-      }
-      actions.forEach(a => {
-        const btn = document.createElement('button');
-        btn.className = 'info-action';
-        btn.innerHTML = `
-          <span class="ic"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
-          <span>${a.label}</span>
-        `;
-        btn.addEventListener('click', () => goTo(a.target));
-        actionsEl.appendChild(btn);
-      });
-    }
-
-    // Prev / Next buttons
-    const currentIdx = state.screens.findIndex(s => s.id === screen.id);
-    if (prevBtn) prevBtn.disabled = currentIdx <= 0;
-    if (nextBtn) nextBtn.disabled = currentIdx >= state.screens.length - 1;
-  }
-
-  function updateStageTop(screen) {
-    const nameEl = document.getElementById('stageName');
-    const idxEl = document.getElementById('stageIdx');
+  function updateIndicator(screen) {
+    const nameEl = document.getElementById('indicatorScreen');
     if (nameEl) nameEl.textContent = screen.name;
-    if (idxEl) idxEl.textContent = `${String(state.screens.findIndex(s => s.id === screen.id) + 1).padStart(2, '0')} / ${state.screens.length}`;
   }
 
-  // ---------- Navigation buttons ----------
-  document.getElementById('prevBtn')?.addEventListener('click', () => {
-    const idx = state.screens.findIndex(s => s.id === state.currentId);
-    if (idx > 0) goTo(state.screens[idx - 1].id);
-  });
-  document.getElementById('nextBtn')?.addEventListener('click', () => {
-    const idx = state.screens.findIndex(s => s.id === state.currentId);
-    if (idx < state.screens.length - 1) goTo(state.screens[idx + 1].id);
-  });
-  document.getElementById('backBtn')?.addEventListener('click', () => {
-    if (state.history.length === 0) return;
-    const prev = state.history.pop();
-    goTo(prev, { addToHistory: false });
-  });
-  document.getElementById('restartBtn')?.addEventListener('click', () => {
-    state.history = [];
-    state.visited.clear();
-    stopTour();
-    goTo(1, { addToHistory: false });
-  });
-
-  // ---------- Tour ----------
-  document.getElementById('tourBtn')?.addEventListener('click', () => {
-    if (state.tourActive) stopTour();
-    else startTour();
-  });
-
-  function startTour() {
-    state.tourActive = true;
-    document.getElementById('tourBtn')?.classList.add('is-on');
-    document.getElementById('tourBtnLabel') && (document.getElementById('tourBtnLabel').textContent = 'Stop tour');
-    goTo(TOUR[0], { addToHistory: false });
+  function flashToast(text) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add('is-on');
+    clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(() => toast.classList.remove('is-on'), 1400);
   }
-  function stopTour() {
-    state.tourActive = false;
-    clearTimeout(state.tourTimer);
-    document.getElementById('tourBtn')?.classList.remove('is-on');
-    document.getElementById('tourBtnLabel') && (document.getElementById('tourBtnLabel').textContent = 'Start guided tour');
+
+  // ---------- Wire up interactivity within the current screen ----------
+  function wireScreen() {
+    const phone = document.getElementById('phoneScreen');
+    if (!phone) return;
+
+    // 1. Navigation hotspots
+    const flow = FLOW[state.currentId];
+    if (flow && flow.hotspots) {
+      flow.hotspots.forEach(hs => {
+        const all = hs.all === true;
+        const targets = all ? phone.querySelectorAll(hs.selector) : [phone.querySelector(hs.selector)].filter(Boolean);
+        targets.forEach(t => {
+          if (!t || t.dataset.hsWired === '1') return;
+          t.dataset.hsWired = '1';
+          t.addEventListener('click', e => {
+            // Only navigate if the click target isn't a known interactive widget below
+            if (isInteractiveWidget(e.target, t)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            goTo(hs.target);
+          });
+        });
+      });
+    }
+
+    // 2. Generic widget interactivity (so non-navigating controls still feel alive)
+
+    // Tabs (segmented)
+    phone.querySelectorAll('.tabs').forEach(group => {
+      group.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          group.querySelectorAll('button').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+        });
+      });
+    });
+
+    // Tabs (underline)
+    phone.querySelectorAll('.tabs-u').forEach(group => {
+      group.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          group.querySelectorAll('button').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+        });
+      });
+    });
+
+    // Chart picker buttons
+    phone.querySelectorAll('.picker').forEach(group => {
+      group.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          group.querySelectorAll('button').forEach(b => b.classList.remove('is-active'));
+          btn.classList.add('is-active');
+        });
+      });
+    });
+
+    // Filter pills — toggle (or single-select if first child is selected)
+    phone.querySelectorAll('.filter-row').forEach(row => {
+      row.querySelectorAll('.f-pill').forEach(pill => {
+        pill.addEventListener('click', e => {
+          e.stopPropagation();
+          row.querySelectorAll('.f-pill').forEach(p => p.classList.remove('is-active'));
+          pill.classList.add('is-active');
+        });
+      });
+    });
+
+    // Toggles
+    phone.querySelectorAll('.toggle').forEach(t => {
+      t.addEventListener('click', e => {
+        e.stopPropagation();
+        t.classList.toggle('is-on');
+      });
+    });
+
+    // OTP boxes — clicking advances the cursor
+    phone.querySelectorAll('.otp-boxes').forEach(boxes => {
+      const items = Array.from(boxes.querySelectorAll('div'));
+      items.forEach((it, i) => {
+        it.addEventListener('click', e => {
+          e.stopPropagation();
+          items.forEach(x => x.classList.remove('is-active'));
+          it.classList.add('is-active');
+        });
+      });
+    });
+
+    // Onboarding dots — visual progress
+    phone.querySelectorAll('.onb-dots').forEach(dots => {
+      dots.querySelectorAll('i').forEach((dot, i) => {
+        dot.addEventListener('click', e => {
+          e.stopPropagation();
+          dots.querySelectorAll('i').forEach(d => d.classList.remove('is-active'));
+          dot.classList.add('is-active');
+        });
+      });
+    });
+
+    // Inputs: focus on click and allow typing (clear default placeholder-style values on first focus if desired)
+    phone.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('click', e => e.stopPropagation());
+    });
+
+    // Stop propagation on the entire bottom-sheet body so taps inside don't trigger scrim navigation
+    phone.querySelectorAll('.bottom-sheet > div, [style*="border-radius:24px 24px 0 0"]').forEach(sheet => {
+      sheet.addEventListener('click', e => e.stopPropagation());
+    });
+  }
+
+  // Identify clicks that should be handled as widgets (not navigation)
+  function isInteractiveWidget(el, hotspotEl) {
+    // If the click target is INSIDE a tabs/picker/filter-row/toggle and the hotspot element is something larger, treat as widget
+    const widgetSelectors = ['.tabs button', '.tabs-u button', '.picker button', '.f-pill', '.toggle'];
+    for (let i = 0; i < widgetSelectors.length; i++) {
+      const w = el.closest(widgetSelectors[i]);
+      if (w && w !== hotspotEl && !hotspotEl.contains(w)) return true;
+      // If hotspotEl itself is the widget, that's fine — navigation should still happen
+    }
+    return false;
   }
 
   // ---------- Keyboard ----------
   function setupKeyboard() {
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        document.getElementById('nextBtn')?.click();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        document.getElementById('prevBtn')?.click();
-      } else if (e.key === 'Escape') {
-        document.getElementById('backBtn')?.click();
-      } else if (e.key === 'r' || e.key === 'R') {
-        document.getElementById('restartBtn')?.click();
-      } else if (e.key === ' ') {
-        e.preventDefault();
-        document.getElementById('tourBtn')?.click();
+
+      if (e.key === 'Escape') {
+        if (document.getElementById('screensDrawer')?.classList.contains('is-open')) {
+          closeDrawer();
+          return;
+        }
+        // Back
+        if (state.history.length > 0) {
+          const prev = state.history.pop();
+          goTo(prev, { addToHistory: false });
+        }
+      } else if (e.key === 'ArrowRight') {
+        const idx = state.screens.findIndex(s => s.id === state.currentId);
+        if (idx < state.screens.length - 1) goTo(state.screens[idx + 1].id);
+      } else if (e.key === 'ArrowLeft') {
+        const idx = state.screens.findIndex(s => s.id === state.currentId);
+        if (idx > 0) goTo(state.screens[idx - 1].id);
+      } else if (e.key === 's' || e.key === 'S') {
+        openDrawer();
       }
     });
   }
