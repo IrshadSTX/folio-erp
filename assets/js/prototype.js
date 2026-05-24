@@ -229,24 +229,19 @@
   };
 
   // ---------- Bootstrap ----------
-  init();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
-  async function init() {
+  function init() {
     try {
-      const res = await fetch('index.html');
-      const text = await res.text();
-      const doc = new DOMParser().parseFromString(text, 'text/html');
+      // Screens are inlined in prototype.html inside #screensSource — read them directly.
+      const source = document.getElementById('screensSource');
+      if (!source) throw new Error('#screensSource not found');
 
-      // Extract sprite (SVG <defs>)
-      const sprite = doc.querySelector('svg[width="0"]');
-      if (sprite) state.sprite = sprite.outerHTML;
-
-      // Inject sprite into prototype document so <use href="#i-x"/> works
-      const spriteHost = document.getElementById('spriteHost');
-      if (spriteHost && state.sprite) spriteHost.innerHTML = state.sprite;
-
-      // Extract all 26 screens
-      const wraps = doc.querySelectorAll('.device-wrap');
+      const wraps = source.querySelectorAll('.device-wrap');
       wraps.forEach((w, i) => {
         const id = parseInt(w.id.replace('screen-', ''), 10) || (i + 1);
         const nameEl = w.querySelector('.device-caption .name');
@@ -254,7 +249,6 @@
         const screenEl = w.querySelector('.device-screen');
         if (!screenEl) return;
 
-        // Section lookup
         const section = SECTIONS.find(s => s.screens.includes(id));
         state.screens.push({
           id,
@@ -265,22 +259,25 @@
         });
       });
 
-      // Sort by id to ensure order
       state.screens.sort((a, b) => a.id - b.id);
+
+      if (state.screens.length === 0) {
+        throw new Error('No screens found in #screensSource');
+      }
 
       buildFlowMap();
       goTo(1, { addToHistory: false });
-      hideLoader();
       setupKeyboard();
     } catch (e) {
-      console.error('Failed to load prototype:', e);
-      document.getElementById('loaderTxt').textContent = 'Failed to load. Please refresh.';
+      console.error('Failed to init prototype:', e);
+      const phone = document.getElementById('phoneScreen');
+      if (phone) {
+        phone.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-secondary);font-size:13px">' +
+          '<div style="font-size:32px;margin-bottom:12px">⚠️</div>' +
+          'Could not load screens.<br><br>' +
+          '<small style="color:var(--text-tertiary)">' + (e.message || 'Unknown error') + '</small></div>';
+      }
     }
-  }
-
-  function hideLoader() {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('is-hidden');
   }
 
   // ---------- Flow map (left rail) ----------
