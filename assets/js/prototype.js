@@ -208,58 +208,12 @@
       <a class="nav-item ${activeId === 14 ? 'is-active' : ''}" data-tab="14"><svg width="20" height="20"><use href="#i-msg"/></svg><span>AI Chat</span></a>
       <a class="nav-item ${activeId === 13 ? 'is-active' : ''}" data-tab="13"><svg width="20" height="20"><use href="#i-settings"/></svg><span>Settings</span></a>
       <div class="home-indicator"></div>
-    `;
-
-    // 2. FAB Button
-    const fabButton = document.createElement('button');
-    fabButton.className = 'fab';
-    fabButton.innerHTML = `<svg width="22" height="22"><use href="#i-plus"/></svg>`;
-
-    // 3. FAB Sheet Menu
-    const fabMenuDiv = document.createElement('div');
-    fabMenuDiv.className = 'fab-menu-overlay';
-    fabMenuDiv.id = 'fabMenuOverlay';
-    fabMenuDiv.innerHTML = `
-      <div class="fab-menu-sheet" id="fabMenuSheet">
-        <div class="fab-menu-header">
-          <h3>Quick Actions</h3>
-          <button class="fab-menu-close" id="fabMenuClose"><svg width="14" height="14"><use href="#i-x"/></svg></button>
-        </div>
-        <div class="fab-menu-items">
-          <div class="fab-menu-item" data-action="invoice">
-            <div class="icon" style="color:var(--brand-500)"><svg width="16" height="16"><use href="#i-receipt"/></svg></div>
-            <span>Create Invoice</span>
-          </div>
-          <div class="fab-menu-item" data-action="customer">
-            <div class="icon" style="color:var(--emerald-500)"><svg width="16" height="16"><use href="#i-users"/></svg></div>
-            <span>Add Customer</span>
-          </div>
-          <div class="fab-menu-item" data-action="bill">
-            <div class="icon" style="color:var(--amber-500)"><svg width="16" height="16"><use href="#i-doc"/></svg></div>
-            <span>Add Purchase Bill</span>
-          </div>
-          <div class="fab-menu-item" data-action="expense">
-            <div class="icon" style="color:var(--rose-500)"><svg width="16" height="16"><use href="#i-wallet"/></svg></div>
-            <span>Add Expense</span>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Append to body
+    `;    // Append to body
     phoneContainer.appendChild(navDiv);
 
-    // Only append FAB (+) and its overlay menu on Dashboard, Customer, Invoice, Bill, and Expense lists
-    const fabScreens = [2, 3, 5, 8, 10];
-    if (fabScreens.includes(activeId)) {
-      const body = phoneContainer.querySelector('.screen-body') || phoneContainer;
-      body.style.paddingBottom = '80px';
-      phoneContainer.appendChild(fabButton);
-      phoneContainer.appendChild(fabMenuDiv);
-    } else {
-      const body = phoneContainer.querySelector('.screen-body') || phoneContainer;
-      body.style.paddingBottom = '20px';
-    }
+    // Set bottom padding for screen body to avoid nav overlap
+    const body = phoneContainer.querySelector('.screen-body') || phoneContainer;
+    body.style.paddingBottom = '80px';
   }
 
   // ---------- Dynamic Data Renderers ----------
@@ -702,51 +656,7 @@
       });
     });
 
-    // 3. Floating Action Button (+) menu toggles
-    const fabBtn = container.querySelector('.fab');
-    const overlay = container.querySelector('#fabMenuOverlay');
-    const sheet = container.querySelector('#fabMenuSheet');
-    
-    if (fabBtn && overlay && sheet) {
-      fabBtn.addEventListener('click', () => {
-        overlay.classList.add('is-open');
-        sheet.classList.add('is-open');
-      });
-
-      const closeMenu = () => {
-        overlay.classList.remove('is-open');
-        sheet.classList.remove('is-open');
-      };
-
-      overlay.addEventListener('click', closeMenu);
-      container.querySelector('#fabMenuClose')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeMenu();
-      });
-
-      // Quick Actions options clicks
-      overlay.querySelectorAll('.fab-menu-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const action = item.dataset.action;
-          closeMenu();
-          
-          if (action === 'invoice') {
-            state.newInvoice = { customerId: null, items: [{ name: '', qty: 1, rate: 0 }], discount: 0 };
-            state.invoiceStep = 1;
-            goTo(6);
-          } else if (action === 'customer') {
-            goTo(4);
-          } else if (action === 'bill') {
-            state.uploadedImage = null;
-            goTo(9);
-          } else if (action === 'expense') {
-            state.uploadedImage = null;
-            goTo(11);
-          }
-        });
-      });
-    }
+    // (FAB interaction code removed as FAB is deleted)
 
     // --- Screen Specific Interactions ---
     if (id === 1) {
