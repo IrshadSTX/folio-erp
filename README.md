@@ -23,7 +23,7 @@ Open [`index.html`](./index.html) in any modern browser.
 
 ## Brand
 - **Name:** Folio ERP
-- **Primary:** Indigo (`#4f46e5`) with Emerald accents (`#10b981`)
+- **Theme:** Desert Code (Deep Oasis Green `#0b2b1a` & Midnight `#06150f` with Gold accents `#d6af4b`)
 - **Type:** Inter
 
 ## Next steps

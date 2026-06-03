@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="assets/css/prototype.css" />
 </head>
 <body>
+<div class="noise"></div>
+<div class="aurora"></div>
 
 <!-- Reusable SVG sprite -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -434,13 +436,13 @@
               <svg viewBox="0 0 300 120" width="100%" height="110">
                 <defs>
                   <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#6366f1" stop-opacity=".25"/>
-                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+                    <stop offset="0%" stop-color="var(--brand-500)" stop-opacity=".25"/>
+                    <stop offset="100%" stop-color="var(--brand-500)" stop-opacity="0"/>
                   </linearGradient>
                 </defs>
                 <path d="M0 90 L40 75 L80 82 L120 55 L160 62 L200 40 L240 48 L300 22 L300 120 L0 120 Z" fill="url(#g1)"/>
-                <path d="M0 90 L40 75 L80 82 L120 55 L160 62 L200 40 L240 48 L300 22" stroke="#6366f1" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="240" cy="48" r="4" fill="#fff" stroke="#6366f1" stroke-width="2.5"/>
+                <path d="M0 90 L40 75 L80 82 L120 55 L160 62 L200 40 L240 48 L300 22" stroke="var(--brand-500)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="240" cy="48" r="4" fill="#fff" stroke="var(--brand-500)" stroke-width="2.5"/>
               </svg>
               <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text-tertiary)"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
             </div>
@@ -494,7 +496,7 @@
           <div style="flex:1;position:relative;display:flex">
             <div style="width:78%;background:var(--bg-screen);height:100%;display:flex;flex-direction:column;padding-top:16px;box-shadow:var(--shadow-xl);overflow-y:auto" class="hide-scroll">
               <div style="display:flex;align-items:center;gap:12px;padding:0 20px 20px;border-bottom:1px solid var(--border)">
-                <div class="avatar lg" style="background:linear-gradient(135deg,#6366f1,#7c3aed)">RM</div>
+                <div class="avatar lg" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-700))">RM</div>
                 <div>
                   <div style="font-size:15px;font-weight:600">Rahul Mehta</div>
                   <div style="font-size:12px;color:var(--text-tertiary)">Acme Trading Co.</div>
@@ -712,7 +714,7 @@
               <div class="right"><div class="amt">₹ 12,400</div><span class="chip tone-success" style="margin-top:2px">Paid</span></div>
             </div>
             <div class="list-item">
-              <div class="avatar sm" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">NP</div>
+              <div class="avatar sm" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-600))">NP</div>
               <div class="body"><div class="ttl">INV-2419 · Neha Patel</div><div class="sub">Due Apr 02, 2026</div></div>
               <div class="right"><div class="amt">₹ 8,650</div><span class="chip tone-info" style="margin-top:2px">Sent</span></div>
             </div>
@@ -955,7 +957,7 @@
             </div>
 
             <div class="list-item">
-              <div class="avatar sm" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">NP</div>
+              <div class="avatar sm" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-600))">NP</div>
               <div class="body"><div class="ttl">QUO-1124 · Neha Patel</div><div class="sub">Valid until 12 Jun · sent 2d ago</div></div>
               <div class="right"><div class="amt">₹ 28,400</div><span class="chip tone-success" style="margin-top:2px">Approved</span></div>
             </div>
@@ -1132,7 +1134,7 @@
             </div>
             <div class="search-result-group">N</div>
             <div class="list-item">
-              <div class="avatar sm" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">NP</div>
+              <div class="avatar sm" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-600))">NP</div>
               <div class="body"><div class="ttl">Neha Patel</div><div class="sub">Ahmedabad · 4 invoices · New</div></div>
               <div class="right"><div class="amt">₹ 32K</div><div class="meta">2 pending</div></div>
             </div>
@@ -1458,8 +1460,8 @@
 
             <div class="sig-pad">
               <svg class="sig-svg" width="240" height="60" viewBox="0 0 240 60" fill="none">
-                <path d="M10 45 Q 25 10, 40 30 T 75 35 Q 90 5, 110 32 Q 135 50, 155 22 Q 175 5, 195 30 T 230 28" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                <path d="M50 50 Q 60 45, 70 50 T 90 48" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
+                <path d="M10 45 Q 25 10, 40 30 T 75 35 Q 90 5, 110 32 Q 135 50, 155 22 Q 175 5, 195 30 T 230 28" stroke="var(--brand-600)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path d="M50 50 Q 60 45, 70 50 T 90 48" stroke="var(--brand-600)" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.6"/>
               </svg>
               <div class="sig-lbl">Tap and draw with your finger</div>
             </div>
@@ -1544,14 +1546,14 @@
                 <div class="donut-row">
                   <svg width="120" height="120" viewBox="0 0 42 42">
                     <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--bg-subtle)" stroke-width="6"/>
-                    <circle cx="21" cy="21" r="15.9" fill="none" stroke="#6366f1" stroke-width="6" stroke-dasharray="42 100" stroke-dashoffset="25" stroke-linecap="round"/>
+                    <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--brand-500)" stroke-width="6" stroke-dasharray="42 100" stroke-dashoffset="25" stroke-linecap="round"/>
                     <circle cx="21" cy="21" r="15.9" fill="none" stroke="#10b981" stroke-width="6" stroke-dasharray="28 100" stroke-dashoffset="-17" stroke-linecap="round"/>
                     <circle cx="21" cy="21" r="15.9" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="18 100" stroke-dashoffset="-45" stroke-linecap="round"/>
                     <text x="21" y="20" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor">₹14.2L</text>
                     <text x="21" y="26" text-anchor="middle" font-size="3" fill="var(--text-tertiary)">total</text>
                   </svg>
                   <div class="donut-legend">
-                    <div class="li"><i style="background:#6366f1"></i> Groceries <b>42%</b></div>
+                    <div class="li"><i style="background:var(--brand-500)"></i> Groceries <b>42%</b></div>
                     <div class="li"><i style="background:#10b981"></i> Oils &amp; FMCG <b>28%</b></div>
                     <div class="li"><i style="background:#f59e0b"></i> Services <b>18%</b></div>
                     <div class="li"><i style="background:#e2e8f0"></i> Other <b>12%</b></div>
@@ -1691,7 +1693,7 @@
 
             <div style="padding:0 20px 16px">
               <div class="card" style="padding:18px;display:flex;align-items:center;gap:14px">
-                <div class="avatar lg" style="background:linear-gradient(135deg,#6366f1,#7c3aed)">RM</div>
+                <div class="avatar lg" style="background:linear-gradient(135deg,var(--brand-500),var(--brand-700))">RM</div>
                 <div style="flex:1">
                   <div style="font-size:15px;font-weight:600">Rahul Mehta</div>
                   <div style="font-size:12px;color:var(--text-tertiary)">Owner · Acme Trading Co.</div>
@@ -1758,7 +1760,7 @@
 
             <div style="padding:8px 20px 20px;text-align:center">
               <div style="position:relative;display:inline-block">
-                <div class="avatar lg" style="width:96px;height:96px;font-size:28px;background:linear-gradient(135deg,#6366f1,#7c3aed);box-shadow:0 12px 24px -8px rgba(99,102,241,0.5)">RM</div>
+                <div class="avatar lg" style="width:96px;height:96px;font-size:28px;background:linear-gradient(135deg,var(--brand-500),var(--brand-700));box-shadow:0 12px 24px -8px rgba(214,175,75,0.4)">RM</div>
                 <button style="position:absolute;bottom:4px;right:4px;width:32px;height:32px;border-radius:50%;background:var(--brand-600);color:#fff;display:grid;place-items:center;border:3px solid var(--bg-screen)"><svg width="14" height="14"><use href="#i-edit"/></svg></button>
               </div>
               <div style="font-size:20px;font-weight:700;letter-spacing:-0.01em;margin-top:14px">Rahul Mehta</div>
@@ -1770,7 +1772,7 @@
             </div>
 
             <div style="padding:0 20px 20px">
-              <div class="card" style="padding:0;overflow:hidden;background:linear-gradient(135deg,#0f172a,#4338ca);color:white;position:relative">
+              <div class="card" style="padding:0;overflow:hidden;background:linear-gradient(135deg,var(--slate-950),var(--brand-800));color:white;position:relative">
                 <div style="padding:20px;position:relative;z-index:1">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
                     <div>
@@ -1843,11 +1845,11 @@
             </div>
 
             <div class="empty" style="padding-top:60px">
-              <div class="ill" style="width:140px;height:140px;background:linear-gradient(160deg,var(--brand-50),var(--violet-50));position:relative;overflow:hidden">
+              <div class="ill" style="width:140px;height:140px;background:linear-gradient(160deg,var(--brand-50),var(--brand-100));position:relative;overflow:hidden">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-                  <rect x="14" y="14" width="48" height="60" rx="6" fill="#fff" stroke="#6366f1" stroke-width="2"/>
-                  <rect x="22" y="24" width="22" height="3" rx="1.5" fill="#6366f1"/>
-                  <rect x="22" y="32" width="32" height="2" rx="1" fill="#c7d2fe"/>
+                  <rect x="14" y="14" width="48" height="60" rx="6" fill="#fff" stroke="var(--brand-500)" stroke-width="2"/>
+                  <rect x="22" y="24" width="22" height="3" rx="1.5" fill="var(--brand-500)"/>
+                  <rect x="22" y="32" width="32" height="2" rx="1" fill="var(--brand-200)"/>
                   <rect x="22" y="38" width="32" height="2" rx="1" fill="#c7d2fe"/>
                   <rect x="22" y="44" width="20" height="2" rx="1" fill="#c7d2fe"/>
                   <circle cx="56" cy="56" r="14" fill="#10b981"/>
