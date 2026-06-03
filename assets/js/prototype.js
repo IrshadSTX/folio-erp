@@ -99,7 +99,8 @@
     // AI Chat history state
     chatHistory: [
       { sender: 'assistant', text: "Hello! I am your Folio AI Assistant. How can I help you manage your business today?\n\nYou can ask me about:\n• Today's sales summary\n• Pending invoices\n• Outstanding customer balances" }
-    ]
+    ],
+    currentAttachment: null
   };
 
   // Helper to format currency
@@ -213,7 +214,7 @@
 
     // Set bottom padding for screen body to avoid nav overlap
     const body = phoneContainer.querySelector('.screen-body') || phoneContainer;
-    body.style.paddingBottom = '80px';
+    body.style.paddingBottom = activeId === 14 ? '0px' : '80px';
   }
 
   // ---------- Dynamic Data Renderers ----------
@@ -611,8 +612,15 @@
       if (chatMessages) {
         chatMessages.innerHTML = state.chatHistory.map(msg => {
           if (msg.sender === 'user') {
+            const attachHTML = msg.attachment ? `
+              <div style="display:flex; align-items:center; gap:6px; background:rgba(214,175,75,0.15); border:1px solid var(--border); padding:6px 10px; border-radius:8px; margin-bottom:6px; font-size:11px; color:var(--brand-500); width:fit-content; max-width:100%; word-break:break-all;">
+                <svg width="12" height="12" style="stroke:currentColor; stroke-width:2;"><use href="#i-paperclip"/></svg>
+                <span>${msg.attachment}</span>
+              </div>
+            ` : '';
             return `
-              <div class="chat-bubble user">
+              <div class="chat-bubble user" style="display: flex; flex-direction: column; align-items: flex-start;">
+                ${attachHTML}
                 <div>${msg.text.replace(/\n/g, '<br>')}</div>
               </div>
             `;
@@ -628,6 +636,18 @@
         
         // Auto scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // Sync attachment preview block
+      const attachPreview = container.querySelector('#chat-attachment-preview');
+      const attachName = container.querySelector('#chat-attachment-name');
+      if (attachPreview && attachName) {
+        if (state.currentAttachment) {
+          attachName.textContent = state.currentAttachment;
+          attachPreview.style.display = 'flex';
+        } else {
+          attachPreview.style.display = 'none';
+        }
       }
     }
   }
@@ -1270,7 +1290,17 @@
 
       const handleSend = (text) => {
         if (!text || text.trim() === '') return;
-        state.chatHistory.push({ sender: 'user', text: text });
+        const currentAttachment = state.currentAttachment;
+        
+        state.chatHistory.push({ 
+          sender: 'user', 
+          text: text, 
+          attachment: currentAttachment 
+        });
+        
+        // Reset state
+        state.currentAttachment = null;
+        
         renderScreenContent(14, container);
 
         // Simulated AI response
@@ -1322,6 +1352,10 @@
             responseText = "I'm your Folio GPT ERP assistant. Try asking me:\n\n• **Sales summary**\n• **Pending invoices**\n• **Outstanding customer balances**\n• **Total expenses**";
           }
 
+          if (currentAttachment) {
+            responseText = `[Simulated OCR Analysis of **${currentAttachment}**]\n\nI have successfully scanned and verified the attached document. Based on its content: ${responseText}`;
+          }
+
           state.chatHistory.push({ sender: 'assistant', text: responseText });
           renderScreenContent(14, container);
           wireScreenInteractions(14, container); // re-wire events
@@ -1329,38 +1363,149 @@
       };
 
       if (sendBtn && input) {
-        sendBtn.addEventListener('click', () => {
+        sendBtn.onclick = () => {
           const val = input.value;
           input.value = '';
           handleSend(val);
-        });
+        };
 
-        input.addEventListener('keydown', (e) => {
+        input.onkeydown = (e) => {
           if (e.key === 'Enter') {
             const val = input.value;
             input.value = '';
             handleSend(val);
           }
+        };
+      }
+
+      // Attachment drawer triggers
+      const attachBtn = container.querySelector('#chat-attach-btn');
+      const attachOverlay = container.querySelector('#attach-drawer-overlay');
+      const attachSheet = container.querySelector('#attach-drawer-sheet');
+      const attachClose = container.querySelector('#attach-drawer-close');
+      const attachRemove = container.querySelector('#chat-attachment-remove');
+
+      if (attachBtn && attachOverlay && attachSheet) {
+        attachBtn.onclick = () => {
+          attachOverlay.style.display = 'block';
+          attachSheet.style.display = 'block';
+          void attachSheet.offsetHeight; // force layout reflow
+          attachOverlay.classList.add('is-open');
+          attachSheet.classList.add('is-open');
+        };
+
+        const closeAttachDrawer = () => {
+          attachOverlay.classList.remove('is-open');
+          attachSheet.classList.remove('is-open');
+          setTimeout(() => {
+            attachOverlay.style.display = 'none';
+            attachSheet.style.display = 'none';
+          }, 250);
+        };
+
+        attachOverlay.onclick = closeAttachDrawer;
+        if (attachClose) attachClose.onclick = closeAttachDrawer;
+
+        // Attachment options selection
+        container.querySelectorAll('.attach-option-btn').forEach(btn => {
+          btn.onclick = () => {
+            const fileName = btn.dataset.name || 'document.pdf';
+            state.currentAttachment = fileName;
+            
+            // Sync preview block directly
+            const preview = container.querySelector('#chat-attachment-preview');
+            const nameSpan = container.querySelector('#chat-attachment-name');
+            if (preview && nameSpan) {
+              nameSpan.textContent = fileName;
+              preview.style.display = 'flex';
+            }
+            
+            closeAttachDrawer();
+            flashToast(`Attached: ${fileName}`);
+          };
         });
+      }
+
+      if (attachRemove) {
+        attachRemove.onclick = () => {
+          state.currentAttachment = null;
+          const preview = container.querySelector('#chat-attachment-preview');
+          if (preview) preview.style.display = 'none';
+          flashToast('Attachment removed');
+        };
+      }
+
+      // Voice dictation triggers
+      const voiceBtn = container.querySelector('#chat-voice-btn');
+      const voiceOverlay = container.querySelector('#voice-overlay');
+      const voiceCloseBtn = container.querySelector('#voice-close-btn');
+      const voiceStatus = container.querySelector('#voice-status');
+
+      if (voiceBtn && voiceOverlay) {
+        voiceBtn.onclick = () => {
+          voiceOverlay.style.display = 'flex';
+          void voiceOverlay.offsetHeight;
+          voiceOverlay.classList.add('is-open');
+          if (voiceStatus) voiceStatus.textContent = 'Listening...';
+
+          // Simulate steps of speech recognition
+          state.voiceTimer1 = setTimeout(() => {
+            if (voiceStatus) voiceStatus.textContent = 'Processing speech...';
+          }, 1500);
+
+          state.voiceTimer2 = setTimeout(() => {
+            const spokenQueries = [
+              "Summarize today sales",
+              "Show pending invoices",
+              "Show outstanding customer balances",
+              "Show month expense"
+            ];
+            const chosen = spokenQueries[Math.floor(Math.random() * spokenQueries.length)];
+            
+            voiceOverlay.classList.remove('is-open');
+            setTimeout(() => {
+              voiceOverlay.style.display = 'none';
+            }, 250);
+            
+            if (input) {
+              input.value = chosen;
+              handleSend(chosen);
+              input.value = '';
+            }
+          }, 3200);
+        };
+
+        if (voiceCloseBtn) {
+          voiceCloseBtn.onclick = () => {
+            clearTimeout(state.voiceTimer1);
+            clearTimeout(state.voiceTimer2);
+            voiceOverlay.classList.remove('is-open');
+            setTimeout(() => {
+              voiceOverlay.style.display = 'none';
+            }, 250);
+            flashToast('Voice input cancelled');
+          };
+        }
       }
 
       // Clear chat
       if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
+        clearBtn.onclick = () => {
           state.chatHistory = [
             { sender: 'assistant', text: "Chat history cleared. How can I help you manage your business today?" }
           ];
+          state.currentAttachment = null;
           renderScreenContent(14, container);
           wireScreenInteractions(14, container);
-        });
+        };
       }
 
       // Prompt chips
       container.querySelectorAll('#chat-prompt-chips .prompt-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
+        chip.onclick = () => {
           const text = chip.dataset.prompt;
           handleSend(text);
-        });
+        };
       });
     }
   }
